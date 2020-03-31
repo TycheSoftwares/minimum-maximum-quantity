@@ -211,7 +211,7 @@ function wc_qty_update_cart_validation( $passed, $cart_item_key, $values, $quant
 		'error' );
 		$passed = false;
 	}
-	if ( isset( $new_max ) && ( $already_in_cart + $quantity ) < $new_min ) {
+	if ( isset( $new_min ) && ( $already_in_cart + $quantity ) < $new_min ) {
 		wc_add_notice( apply_filters( 'wc_qty_error_message', sprintf( __( 'You should have minimum of %1$s %2$s\'s to %3$s.', 'woocommerce-max-quantity' ),
 					$new_min,
 					$product->get_name(),
