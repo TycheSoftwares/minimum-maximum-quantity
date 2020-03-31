@@ -66,10 +66,11 @@ function wc_qty_input_args( $args, $product ) {
 	$product_id = $product->get_parent_id() ? $product->get_parent_id() : $product->get_id();
 	
 	$product_min = wc_get_product_min_limit( $product_id );
-	$product_max = wc_get_product_max_limit( $product_id );	
+    $product_max = wc_get_product_max_limit( $product_id );	
+    
 	if ( ! empty( $product_min ) ) {
 		// min is empty
-		if ( false !== $product_max ) {
+		if ( false !== $product_min ) {
 			$args['min_value'] = $product_min;
 		}
 	}
@@ -82,7 +83,7 @@ function wc_qty_input_args( $args, $product ) {
 	if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
 		$stock = $product->get_stock_quantity();
 		$args['max_value'] = min( $stock, $args['max_value'] );	
-	}
+    }
 
 	return $args;
 }
@@ -138,7 +139,7 @@ function wc_qty_add_to_cart_validation( $passed, $product_id, $quantity, $variat
 	
 	if ( ! empty( $already_in_cart ) ) {
 		
-		if ( ( $already_in_cart + $quantity ) > $new_max ) {
+		if ( isset( $new_max ) && ( $already_in_cart + $quantity ) > $new_max ) {
 			// oops. too much.
 			$passed = false;			
 			wc_add_notice( apply_filters( 'isa_wc_max_qty_error_message_already_had', sprintf( __( 'You can add a maximum of %1$s %2$s\'s to %3$s. You already have %4$s.', 'woocommerce-max-quantity' ), 
@@ -198,8 +199,10 @@ function wc_qty_update_cart_validation( $passed, $cart_item_key, $values, $quant
 		}
 	}
 	$product = wc_get_product( $values['product_id'] );
-	$already_in_cart = wc_qty_get_cart_qty( $values['product_id'], $cart_item_key );
-	if ( ( $already_in_cart + $quantity ) > $new_max ) {
+    $already_in_cart = wc_qty_get_cart_qty( $values['product_id'], $cart_item_key );
+    
+    
+	if ( isset( $new_max ) && ( $already_in_cart + $quantity ) > $new_max ) {
 		wc_add_notice( apply_filters( 'wc_qty_error_message', sprintf( __( 'You can add a maximum of %1$s %2$s\'s to %3$s.', 'woocommerce-max-quantity' ),
 					$new_max,
 					$product->get_name(),
@@ -208,7 +211,7 @@ function wc_qty_update_cart_validation( $passed, $cart_item_key, $values, $quant
 		'error' );
 		$passed = false;
 	}
-	if ( ( $already_in_cart + $quantity )  < $new_min ) {
+	if ( isset( $new_max ) && ( $already_in_cart + $quantity ) < $new_min ) {
 		wc_add_notice( apply_filters( 'wc_qty_error_message', sprintf( __( 'You should have minimum of %1$s %2$s\'s to %3$s.', 'woocommerce-max-quantity' ),
 					$new_min,
 					$product->get_name(),
